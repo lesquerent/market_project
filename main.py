@@ -1,3 +1,1 @@
-print('hello')
-
-print('Hello Git')
+print('All good')
