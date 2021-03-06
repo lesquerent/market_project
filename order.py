@@ -29,6 +29,12 @@ class Order:
     def get_qty(self):
         return self._quantity
 
+    def get_price(self):
+        return self._price
+
+    def set_qty(self, quantity):
+        self._quantity = quantity
+
 
 if __name__ == '__main__':
     order1 = Order(130, 13, 'sell')
