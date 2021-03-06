@@ -1,4 +1,5 @@
 from order import Order
+from deal import Deal
 
 
 class Book:
@@ -19,17 +20,86 @@ class Book:
 
     def insert_sell(self, quantity, price):
         sell_order = Order(quantity, price, type_of_order='sell')
-        self._sell_orders.append(sell_order)
-        self._sell_orders.sort()
-        self._sell_orders.reverse()
-        print('--- Insert {order} on {book}'.format(order=sell_order.__str__(), book=self._name))
+
+        if quantity != 0:
+            self._sell_orders.append(sell_order)
+            self._sell_orders.sort()
+            # self._sell_orders.reverse()
+            print('--- Insert {order} on {book}'.format(order=sell_order.__str__(), book=self._name))
+
+        if len(self._buy_orders)!=0:
+            while self._buy_orders[0].get_price() >= sell_order.get_price() and sell_order.get_qty() > 0:
+
+                # Case quantity sell order > first buy order in our book
+                if sell_order.get_qty() >= self._buy_orders[0].get_qty():
+                    deal = Deal(self._buy_orders[0].get_qty(), self._buy_orders[0].get_price(), self._name)
+                    self._execute_deals.append(deal)
+
+                    new_qty = sell_order.get_qty() - self._buy_orders[0].get_qty()
+
+                    # Fill the first buy order
+                    self._buy_orders.remove(self._buy_orders[0])
+
+                    sell_order.set_qty(new_qty)
+                    print(deal.__str__())
+
+                # Case quantity sell order < first buy order in our book
+                else:
+                    deal = Deal(sell_order.get_qty(), self._buy_orders[0].get_price(), self._name)
+                    self._execute_deals.append(deal)
+
+                    # Update of the new quantity
+                    self._buy_orders[0].set_qty(self._buy_orders[0].get_qty() - sell_order.get_qty())
+
+                    sell_order.set_qty(0)
+
+                    self._sell_orders.remove(self._sell_orders[-1])
+
+                    print(deal.__str__())
+
         print(self.get_status())
 
     def insert_buy(self, quantity, price):
-        buy_order = Order(quantity, price, type_of_order='buy')
-        self._buy_orders.append(buy_order)
-        self._buy_orders.sort()
-        print('--- Insert {order} on {book}'.format(order=buy_order.__str__(), book=self._name))
+
+        if quantity != 0 :
+            buy_order = Order(quantity, price, type_of_order='buy')
+            self._buy_orders.append(buy_order)
+            self._buy_orders.sort()
+            self._buy_orders.reverse()
+            print('--- Insert {order} on {book}'.format(order=buy_order.__str__(), book=self._name))
+
+        if len(self._sell_orders)!=0:
+            while self._sell_orders[0].get_price() <= buy_order.get_price() and buy_order.get_qty() > 0:
+
+                # Case quantity sell order > first buy order in our book
+                if buy_order.get_qty() >= self._sell_orders[0].get_qty():
+                    deal = Deal(self._sell_orders[0].get_qty(), self._sell_orders[0].get_price(), self._name)
+                    self._execute_deals.append(deal)
+
+                    new_qty = buy_order.get_qty() - self._sell_orders[0].get_qty()
+
+                    # Fill the first buy order
+                    self._sell_orders.remove(self._sell_orders[0])
+
+                    buy_order.set_qty(new_qty)
+                    print(deal.__str__())
+                    print("anus")
+
+                # Case quantity sell order < first buy order in our book
+                else:
+                    deal = Deal(buy_order.get_qty(), self._sell_orders[0].get_price(), self._name)
+                    self._execute_deals.append(deal)
+
+                    # Update of the new quantity
+                    self._sell_orders[0].set_qty(self._sell_orders[0].get_qty() - buy_order.get_qty())
+
+                    buy_order.set_qty(0)
+
+                    self._buy_orders.remove(self._buy_orders[0])
+
+                    print(deal.__str__())
+                    print("anus")
+
         print(self.get_status())
 
     def insert_deals(self, deal):
@@ -43,10 +113,10 @@ class Book:
 
     def get_status(self):
         status = ""
-        if len(self._execute_deals) != 0:
+        """if len(self._execute_deals) != 0:
 
             for deal in self._execute_deals:
-                status += deal.__str__() + '\n'
+                status += deal.__str__() + '\n'"""
 
         status += 'Book on {}\n'.format(self._name.upper())
 
