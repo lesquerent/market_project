@@ -8,10 +8,12 @@ class Book:
             Constructor off an order book
         :param name: str
             The name off the order book. Default : 'Default order book'.
-        :param buy_orders: dict
-            Dictionary containing all buy orders. Default : {}.
-        :param sell_orders:  dict
-            Dictionary containing all sell orders. Default : {}.
+        :param buy_orders: list
+            List containing all buy orders. Default : [].
+        :param sell_orders:  list
+            List containing all sell orders. Default : [].
+        :param execute_deals: list
+            List containing all execute orders. Default : [].
         """
         self._name = name
         self._buy_orders = buy_orders
@@ -27,78 +29,82 @@ class Book:
             # self._sell_orders.reverse()
             print('--- Insert {order} on {book}'.format(order=sell_order.__str__(), book=self._name))
 
-        if len(self._buy_orders)!=0:
-            while self._buy_orders[0].get_price() >= sell_order.get_price() and sell_order.get_qty() > 0:
+        while len(self._buy_orders) != 0 and self._buy_orders[
+            0].get_price() >= sell_order.get_price() and sell_order.get_qty() > 0:
 
-                # Case quantity sell order > first buy order in our book
-                if sell_order.get_qty() >= self._buy_orders[0].get_qty():
-                    deal = Deal(self._buy_orders[0].get_qty(), self._buy_orders[0].get_price(), self._name)
-                    self._execute_deals.append(deal)
+            # Case quantity sell order > first buy order in our book
+            if sell_order.get_qty() > self._buy_orders[0].get_qty():
+                deal = Deal(self._buy_orders[0].get_qty(), self._buy_orders[0].get_price(), self._name)
+                self._execute_deals.append(deal)
 
-                    new_qty = sell_order.get_qty() - self._buy_orders[0].get_qty()
+                new_qty = sell_order.get_qty() - self._buy_orders[0].get_qty()
 
-                    # Fill the first buy order
+                # Fill the first buy order
+                self._buy_orders.remove(self._buy_orders[0])
+
+                sell_order.set_qty(new_qty)
+                print(deal.__str__())
+
+            # Case quantity sell order < first buy order in our book
+            else:
+                deal = Deal(sell_order.get_qty(), self._buy_orders[0].get_price(), self._name)
+                self._execute_deals.append(deal)
+
+                # Update of the new quantity
+                self._buy_orders[0].set_qty(self._buy_orders[0].get_qty() - sell_order.get_qty())
+
+                sell_order.set_qty(0)
+
+                if self._buy_orders[0].get_qty() == 0:
                     self._buy_orders.remove(self._buy_orders[0])
 
-                    sell_order.set_qty(new_qty)
-                    print(deal.__str__())
+                self._sell_orders.remove(self._sell_orders[0])
 
-                # Case quantity sell order < first buy order in our book
-                else:
-                    deal = Deal(sell_order.get_qty(), self._buy_orders[0].get_price(), self._name)
-                    self._execute_deals.append(deal)
-
-                    # Update of the new quantity
-                    self._buy_orders[0].set_qty(self._buy_orders[0].get_qty() - sell_order.get_qty())
-
-                    sell_order.set_qty(0)
-
-                    self._sell_orders.remove(self._sell_orders[-1])
-
-                    print(deal.__str__())
+                print(deal.__str__())
 
         print(self.get_status())
 
     def insert_buy(self, quantity, price):
+        buy_order = Order(quantity, price, type_of_order='buy')
 
-        if quantity != 0 :
-            buy_order = Order(quantity, price, type_of_order='buy')
+        if quantity != 0:
             self._buy_orders.append(buy_order)
             self._buy_orders.sort()
             self._buy_orders.reverse()
             print('--- Insert {order} on {book}'.format(order=buy_order.__str__(), book=self._name))
 
-        if len(self._sell_orders)!=0:
-            while self._sell_orders[0].get_price() <= buy_order.get_price() and buy_order.get_qty() > 0:
+        while len(self._sell_orders) != 0 and self._sell_orders[
+            0].get_price() <= buy_order.get_price() and buy_order.get_qty() > 0:
 
-                # Case quantity sell order > first buy order in our book
-                if buy_order.get_qty() >= self._sell_orders[0].get_qty():
-                    deal = Deal(self._sell_orders[0].get_qty(), self._sell_orders[0].get_price(), self._name)
-                    self._execute_deals.append(deal)
+            # Case quantity sell order > first buy order in our book
+            if buy_order.get_qty() > self._sell_orders[0].get_qty():
+                deal = Deal(self._sell_orders[0].get_qty(), self._sell_orders[0].get_price(), self._name)
+                self._execute_deals.append(deal)
 
-                    new_qty = buy_order.get_qty() - self._sell_orders[0].get_qty()
+                new_qty = buy_order.get_qty() - self._sell_orders[0].get_qty()
 
-                    # Fill the first buy order
+                # Fill the first buy order
+                self._sell_orders.remove(self._sell_orders[0])
+
+                buy_order.set_qty(new_qty)
+                print(deal.__str__())
+
+            # Case quantity sell order < first buy order in our book
+            else:
+                deal = Deal(buy_order.get_qty(), self._sell_orders[0].get_price(), self._name)
+                self._execute_deals.append(deal)
+
+                # Update of the new quantity
+                self._sell_orders[0].set_qty(self._sell_orders[0].get_qty() - buy_order.get_qty())
+
+                buy_order.set_qty(0)
+
+                self._buy_orders.remove(self._buy_orders[0])
+
+                if self._sell_orders[0].get_qty() == 0:
                     self._sell_orders.remove(self._sell_orders[0])
 
-                    buy_order.set_qty(new_qty)
-                    print(deal.__str__())
-                    print("anus")
-
-                # Case quantity sell order < first buy order in our book
-                else:
-                    deal = Deal(buy_order.get_qty(), self._sell_orders[0].get_price(), self._name)
-                    self._execute_deals.append(deal)
-
-                    # Update of the new quantity
-                    self._sell_orders[0].set_qty(self._sell_orders[0].get_qty() - buy_order.get_qty())
-
-                    buy_order.set_qty(0)
-
-                    self._buy_orders.remove(self._buy_orders[0])
-
-                    print(deal.__str__())
-                    print("anus")
+                print(deal.__str__())
 
         print(self.get_status())
 
