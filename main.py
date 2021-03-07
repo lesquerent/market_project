@@ -2,6 +2,7 @@
 
 from book import Book
 
+
 def main():
     book = Book("TEST")
     book.insert_buy(10, 10.0)

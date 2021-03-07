@@ -21,7 +21,7 @@ class Order:
 
     def __lt__(self, other):
         # noinspection PyProtectedMember
-        return self._price < other._price
+        return self._price <= other._price
 
     def get_id(self):
         return self._id
