@@ -1,5 +1,6 @@
 from order import Order
 from deal import Deal
+import pandas as pd
 
 
 class Book:
@@ -21,6 +22,14 @@ class Book:
         self._execute_deals = execute_deals
 
     def insert_sell(self, quantity, price):
+        """
+            Insert sell order in the order book and execute orders if it's possible.
+        :param quantity: int
+            The amount to sell
+        :param price: double
+            The unit price to sell
+        :return: None
+        """
         sell_order = Order(quantity, price, type_of_order='sell')
 
         if quantity != 0:
@@ -64,7 +73,18 @@ class Book:
 
         print(self.get_status())
 
+        return None
+
     def insert_buy(self, quantity, price):
+        """
+            Insert buy order in the order book and execute orders if it's possible.
+        :param quantity: int
+            The amount to buy
+        :param price: double
+            The unit price to buy
+        :return: None
+        """
+
         buy_order = Order(quantity, price, type_of_order='buy')
 
         if quantity != 0:
@@ -108,8 +128,17 @@ class Book:
 
         print(self.get_status())
 
+        return None
+
     def insert_deals(self, deal):
+        """
+            Insert a deal in the _execute_deals list containing all execute orders.
+        :param deal: Deal
+            The execute deal
+        :return: None
+        """
         self._execute_deals.append(deal)
+        return None
 
     def get_sell_order(self):
         return self._sell_orders
@@ -118,28 +147,35 @@ class Book:
         return self._buy_orders
 
     def get_status(self):
+        """
+            Create a string with the status of the order book
+        :return: string
+            Status of the order book
+        """
         status = ""
-        """if len(self._execute_deals) != 0:
-
-            for deal in self._execute_deals:
-                status += deal.__str__() + '\n'"""
 
         status += 'Book on {}\n'.format(self._name.upper())
+        order_book = self.create_df_order()
+        status += order_book.to_string(index=False)
+        # for sell_order in self._sell_orders:
+        #     status += '        {order}\n'.format(order=sell_order.__str__())
+        #
+        # for buy_order in self._buy_orders:
+        #     status += '        {order}\n'.format(order=buy_order.__str__())
 
-        for sell_order in self._sell_orders:
-            status += '        {order}\n'.format(order=sell_order.__str__())
-
-        for buy_order in self._buy_orders:
-            status += '        {order}\n'.format(order=buy_order.__str__())
-
-        status += '------------------------'
+        status += '\n------------------------'
         return status
 
+    def create_df_order(self):
+        """
+            Create a pd.dataframe corresponding to the order book.
+            Create the dataframe form _sell_orders and _buy_orders attributes to an unique dataframe.
 
-if __name__ == '__main__':
-    book = Book("TEST")
-    book.insert_buy(10, 10.0)
-    book.insert_sell(120, 12.0)
-    book.insert_buy(5, 10.0)
-
-    # print(book.get_status())
+        :return: pd.dataframe
+            The pd.dataframe corresponding to the order book
+        """
+        df_sell_orders = pd.DataFrame([sell_order.__dict__ for sell_order in self._sell_orders])
+        df_buy_orders = pd.DataFrame([buy_order.__dict__ for buy_order in self._buy_orders])
+        df_all_orders = df_sell_orders.append(df_buy_orders)
+        df_all_orders.columns = ['QTY', 'PRICE', 'TYPE', 'ID']
+        return df_all_orders

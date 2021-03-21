@@ -1,5 +1,14 @@
 class Deal:
     def __init__(self, quantity, price, book_name):
+        """
+            Constructor off a deal
+        :param quantity: int
+            The amount of the deal
+        :param price: double
+            The unit price of the deal
+        :param book_name : str
+            The name of the book in which the deal was conclude
+        """
         self._quantity = quantity
         self._price = price
         self._book_name = book_name
